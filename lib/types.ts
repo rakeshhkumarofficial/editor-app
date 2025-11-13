@@ -4,7 +4,10 @@ export type Layer = {
     isVisible: boolean,
     x: number,
     y: number,
-    type: 'image' | 'text'
+    type: 'image' | 'text',
+    rotation?: number;
+    scaleX?: number;
+    scaleY?: number;
 }
 
 export type ImageLayer = Layer & {
@@ -18,3 +21,5 @@ export type TextLayer = Layer & {
     fontSize: number,
     fill: string
 }
+
+export type PointerPosition = { x: number; y: number };
