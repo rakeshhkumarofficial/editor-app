@@ -12,28 +12,53 @@ export default function Home() {
   const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
   const [activeTool, setActiveTool] = useState<'text' | 'image'>("text");
 
-  const handleStageClick = useCallback(
-  (pointerPosition: PointerPosition) => {
+ const handleStageClick = useCallback(
+  (pointerPosition: PointerPosition, stageSize: { width: number; height: number }) => {
     if (!activeTool) return;
 
-    const baseLayer = {
-      id: uuidv4(),
-      name: activeTool === 'text' ? 'Text' : 'Image',
-      type: activeTool,
-      isVisible: true,
-      x: pointerPosition.x,
-      y: pointerPosition.y,
-    };
+    if (activeTool === 'text') {
+      const newTextLayer: TextLayer = {
+        id: uuidv4(),
+        name: 'Text',
+        type: 'text',
+        isVisible: true,
+        x: pointerPosition.x,
+        y: pointerPosition.y,
+        text: 'New Text',
+        fontSize: 24,
+        fill: '#000',
+        scaleX: 1,
+        scaleY: 1,
+        rotation: 0,
+      };
+      setLayers((prev) => [...prev, newTextLayer]);
+      setActiveLayerId(newTextLayer.id);
+    } else if (activeTool === 'image') {
+      const img = new Image();
+      img.src = '/flower.jpg';
+      img.onload = () => {
+        const scale = Math.min((stageSize.width * 0.8) / img.width, (stageSize.height * 0.8) / img.height);
 
-    const newLayer: Layer =
-      activeTool === 'text'
-        ? { ...baseLayer, text: 'New Text', fontSize: 24, fill: '#000' } as TextLayer
-        : { ...baseLayer, src: '/flower.jpg' } as ImageLayer;
+        const newImageLayer: ImageLayer = {
+          id: uuidv4(),
+          name: 'Image',
+          type: 'image',
+          isVisible: true,
+          x: pointerPosition.x,
+          y: pointerPosition.y,
+          src: '/flower.jpg',
+          scaleX: scale,
+          scaleY: scale,
+          rotation: 0,
+        };
+        setLayers((prev) => [...prev, newImageLayer]);
+        setActiveLayerId(newImageLayer.id);
+      };
+    }
+  },
+  [activeTool, setLayers, setActiveLayerId]
+);
 
-    setLayers((prevLayers) => [...prevLayers, newLayer]);
-    setActiveLayerId(newLayer.id);
-    
-  }, [activeTool] );
 
   const setLayerProperty = useCallback((layerId: string, property: keyof Layer, value: any) => {
     setLayers((currentLayers) =>
@@ -60,6 +85,7 @@ export default function Home() {
               activeLayerId={activeLayerId}
               setActiveLayerId={setActiveLayerId}
               handleStageClick={handleStageClick}
+              setLayerProperty={setLayerProperty}
             />
           </div>
         </div>
